@@ -1,11 +1,10 @@
 <div class="container">
-  <button id="toggleMode" class="toggle-mode">Toggle Mode</button>
+  <button id="modeSwitch" class="mode-switch">Light Mode ☀️</button>
   <h1 class="title gradient-text">CodeChain Analyzer</h1>
-  <p class="subtitle">Analyze your code and secure reviews on the blockchain.</p>
-  <form id="reviewForm" class="form">
-    <textarea id="codeInput" class="input animate-fade" placeholder="Enter your JavaScript code here..." rows="5"></textarea>
-    <input type="text" id="walletInput" class="input animate-fade" placeholder="Enter wallet address (e.g., 0x...)" required>
-    <button type="submit" class="button animate-pulse">Analyze Code</button>
-  </form>
+  <p class="subtitle">Analyze your code and secure it on the blockchain.</p>
+  <div class="input-area" id="codeInput" contenteditable="true" placeholder="Start typing your JavaScript code here..."></div>
+  <input type="text" id="walletInput" class="wallet-input" placeholder="Enter wallet address (e.g., 0x...)" required>
+  <button id="analyzeButton" class="button">Analyze Code</button>
+  <div id="loader" class="loader"></div>
   <div id="result" class="result"></div>
 </div>
