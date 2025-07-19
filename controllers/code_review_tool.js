@@ -58,64 +58,34 @@ module.exports.analyzeCode = async (code, language) => {
 module.exports.reviewCode = async (req, res) => {
   const { code, language, walletAddress } = req.body;
 
-  if (
-    !code ||
-    !language ||
-    !walletAddress ||
-    typeof code !== "string" ||
-    code.trim().length === 0
-  ) {
-    return res
-      .status(200)
-      .send({
-        status: false,
-        message: "Valid code, language, and walletAddress are required",
-      });
+  if (!code || !language || !walletAddress || typeof code !== "string" || code.trim().length === 0) {
+    return res.status(400).json({
+      status: false,
+      message: "Valid code, language, and walletAddress are required",
+    });
   }
   if (!web3.utils.isAddress(walletAddress)) {
-    return res
-      .status(200)
-      .send({ status: false, message: "Invalid wallet address" });
+    return res.status(400).json({ status: false, message: "Invalid wallet address" });
   }
 
   try {
     console.log(`Analyzing code: ${code.substring(0, 50)}...`);
     const review = await this.analyzeCode(code, language);
 
-    if (
-      !review.issues ||
-      !review.suggestions ||
-      typeof review.score !== "number"
-    ) {
+    if (!review.issues || !review.suggestions || typeof review.score !== "number") {
       console.error("Invalid review format:", review);
-      return res
-        .status(200)
-        .send({ status: false, message: "Invalid review format" });
+      return res.status(500).json({ status: false, message: "Invalid review format" });
     }
 
     const reviewHash = web3.utils.sha3(JSON.stringify(review));
     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
     const tx = contract.methods.storeReview(reviewHash, walletAddress);
 
-    const gas = await tx
-      .estimateGas({ from: account.address })
-      .catch((error) => {
-        console.error("Gas Estimation Error:", error.message);
-        return res
-          .status(200)
-          .send({
-            status: false,
-            message: error.message || "Failed to estimate gas",
-          });
-      });
+    const gas = await tx.estimateGas({ from: account.address }).catch((error) => {
+      throw new Error(`Gas Estimation Error: ${error.message}`);
+    });
     const gasPrice = await web3.eth.getGasPrice().catch((error) => {
-      console.error("Gas Price Error:", error.message);
-      return res
-        .status(200)
-        .send({
-          status: false,
-          message: error.message || "Failed to get gas price",
-        });
+      throw new Error(`Gas Price Error: ${error.message}`);
     });
 
     const gasNumber = Number(gas);
@@ -125,49 +95,25 @@ module.exports.reviewCode = async (req, res) => {
       from: account.address,
       to: contractAddress,
       data: tx.encodeABI(),
-      gas: Math.ceil(gasNumber * 5),
+      gas: gasNumber, // Removed multiplication for optimization
       gasPrice: gasPriceNumber,
       value: "0x0",
       nonce: nonce,
     };
 
-    console.log("Transaction Data:", txData);
-    const signedTx = await web3.eth.accounts.signTransaction(
-      txData,
-      privateKey
-    );
-    console.log("Signed Transaction:", signedTx);
-    let txReceipt;
-    try {
-      txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-      console.log("Transaction Success:", txReceipt);
-    } catch (error) {
-      console.error("Transaction Submission Error:", error);
-      const txHash =
-        signedTx.transactionHash ||
-        (await web3.eth.getTransaction(signedTx.rawTransaction)).hash;
-      txReceipt = await web3.eth.getTransactionReceipt(txHash);
-      console.error("Transaction Receipt:", txReceipt);
-      return res
-        .status(200)
-        .send({
-          status: false,
-          message: error.message || "Transaction failed",
-        });
-    }
+    const signedTx = await web3.eth.accounts.signTransaction(txData, privateKey);
+    const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
-    res.status(200).send({
+    res.status(200).json({
       status: true,
       data: { review, transactionId: txReceipt.transactionHash },
       message: "Code review completed successfully",
     });
   } catch (error) {
     console.error("Error processing request:", error);
-    res
-      .status(500)
-      .send({
-        status: false,
-        message: error.message || "Internal server error",
-      });
+    res.status(500).json({
+      status: false,
+      message: error.message || "Internal server error",
+    });
   }
 };

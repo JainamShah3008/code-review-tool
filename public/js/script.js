@@ -8,8 +8,7 @@ document.getElementById("reviewForm").addEventListener("submit", async (e) => {
   resultDiv.classList.add("show");
 
   try {
-    const response = await fetch("/v1/code-review-tool/rievew-suggestion-code", {
-      // Corrected route
+    const response = await fetch("/v1/code-review-tool/review-suggestion-code", { // Fixed typo
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code, language: "javascript", walletAddress }),
@@ -21,13 +20,14 @@ document.getElementById("reviewForm").addEventListener("submit", async (e) => {
     if (data.error) {
       resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
     } else if (data.status && data.data) {
-      const review = data.data.review; // Access nested review
+      const review = data.data.review;
       const transactionId = data.data.transactionId;
       resultDiv.innerHTML = `
-        <p><strong>Issues:</strong> ${review.issues.join(", ")}</p>
-        <p><strong>Suggestions:</strong> ${review.suggestions.join(", ")}</p>
-        <p><strong>Score:</strong> ${review.score}</p>
-        <p><strong>Transaction ID:</strong> ${transactionId}</p>
+        <h3>Review Results</h3>
+        <p><strong>Issues:</strong> ${review.issues.join(", ") || "None"}</p>
+        <p><strong>Suggestions:</strong> ${review.suggestions.join(", ") || "None"}</p>
+        <p><strong>Score:</strong> ${review.score.toFixed(2)}</p>
+        <p><strong>Transaction ID:</strong> <a href="https://sepolia.etherscan.io/tx/${transactionId}" target="_blank">${transactionId}</a></p>
         <p><strong>Message:</strong> ${data.message}</p>
       `;
     } else {
@@ -36,4 +36,9 @@ document.getElementById("reviewForm").addEventListener("submit", async (e) => {
   } catch (error) {
     resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
   }
+});
+
+// Toggle Dark/Light Mode
+document.getElementById("toggleMode").addEventListener("click", () => {
+  document.body.dataset.theme = document.body.dataset.theme === "light" ? "dark" : "light";
 });
