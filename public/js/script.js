@@ -4,7 +4,7 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
   const language = document.getElementById("languageSelect").value;
   const resultDiv = document.getElementById("result");
   const loader = document.getElementById("loader");
-  const loaderNote = document.getElementById("loader-note"); // Add this ID to your HTML
+  const loaderNote = document.getElementById("loader-note");
 
   if (!code || !walletAddress) {
     resultDiv.innerHTML = `<p class="error">Please enter code and wallet address.</p>`;
@@ -12,7 +12,6 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
     return;
   }
 
-  // Hide result and show loader with note
   resultDiv.classList.remove("show");
   loader.style.display = "block";
   loaderNote.style.display = "block";
@@ -29,8 +28,8 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
     });
 
     const data = await response.json();
-    loader.style.display = "none"; // Hide loader after response
-    loaderNote.style.display = "none"; // Hide note after response
+    loader.style.display = "none";
+    loaderNote.style.display = "none";
 
     if (data.status === false) {
       resultDiv.innerHTML = `<p class="error">${data.message}</p>`;
@@ -40,18 +39,25 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
       let issuesHtml = review.issues.length
         ? review.issues
             .map(
-              (issue) =>
-                `<span class="badge ${
+              (issue, index) =>
+                `<div class="issues-item" style="animation-delay: ${
+                  index * 0.2
+                }s"><span class="badge ${
                   issue.includes("error") ? "critical" : "warning"
-                }">${issue}</span>`
+                }">${issue}</span></div>`
             )
-            .join(" ")
-        : "<span>No issues</span>";
+            .join("")
+        : "<div class='issues-item'><span>No issues</span></div>";
       let suggestionsHtml = review.suggestions.length
         ? review.suggestions
-            .map((suggestion) => `<p class="suggestion-item">${suggestion}</p>`)
+            .map(
+              (suggestion, index) =>
+                `<div class="suggestion-part" style="animation-delay: ${
+                  index * 0.2
+                }s"><p>${suggestion}</p></div>`
+            )
             .join("")
-        : "<p>No suggestions</p>";
+        : "<div class='suggestion-part'><p>No suggestions</p></div>";
 
       resultDiv.innerHTML = `
         <div class="result-block"><h4>Issues Detected</h4><div class="issues-container">${issuesHtml}</div></div>
@@ -59,7 +65,7 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
         <div class="result-block"><h4>Code Health Score</h4><div class="score-bar"><div class="score-bar-fill" style="width: ${
           review.score * 100
         }%"></div></div><p>Score: ${review.score.toFixed(2)} / 1.0</p></div>
-        <div class="result-block"><h4>Transaction Details</h4><p>Transaction ID: <span class="transaction-id" title="${transactionId}">${transactionId.slice(
+        <div class="result-block transaction-block"><h4>Transaction Details</h4><p>Transaction ID: <span class="transaction-id" title="${transactionId}">${transactionId.slice(
         0,
         10
       )}...</span></p></div>
@@ -75,10 +81,10 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
     } else {
       resultDiv.innerHTML = `<p class="error">Unexpected response format</p>`;
     }
-    resultDiv.classList.add("show"); // Show result after processing
+    resultDiv.classList.add("show");
   } catch (error) {
-    loader.style.display = "none"; // Hide loader on error
-    loaderNote.style.display = "none"; // Hide note on error
+    loader.style.display = "none";
+    loaderNote.style.display = "none";
     resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
     resultDiv.classList.add("show");
   }
@@ -133,6 +139,6 @@ modeSwitch.textContent = "Light Mode ☀️";
 
 // Enforce styles on contenteditable div to override inline styles
 const codeInput = document.getElementById("codeInput");
-codeInput.style.padding = "25px"; // Ensure padding
-codeInput.style.backgroundColor = ""; // Reset to let CSS var(--input-bg) take over
-codeInput.style.color = ""; // Reset to let CSS var(--text-primary) take over
+codeInput.style.padding = "25px";
+codeInput.style.backgroundColor = "";
+codeInput.style.color = "";
