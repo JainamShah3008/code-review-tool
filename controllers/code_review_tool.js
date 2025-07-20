@@ -40,18 +40,11 @@ module.exports.analyzeCode = async (code, language) => {
       cache.set(cacheKey, review);
       return review;
     } else {
-      return res
-        .status(200)
-        .send({ status: false, message: "Model returned invalid JSON format" });
+      throw new Error("Model returned invalid JSON format");
     }
   } catch (error) {
     console.error("API Error:", error.message);
-    return res
-      .status(200)
-      .send({
-        status: false,
-        message: error.message || "Failed to analyze code",
-      });
+    throw error;
   }
 };
 
@@ -95,7 +88,7 @@ module.exports.reviewCode = async (req, res) => {
       from: account.address,
       to: contractAddress,
       data: tx.encodeABI(),
-      gas: gasNumber, // Removed multiplication for optimization
+      gas: gasNumber,
       gasPrice: gasPriceNumber,
       value: "0x0",
       nonce: nonce,

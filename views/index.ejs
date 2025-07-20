@@ -1,9 +1,26 @@
 <div class="container">
   <button id="modeSwitch" class="mode-switch">Light Mode ☀️</button>
-  <h1 class="title gradient-text">CodeChain Analyzer</h1>
+  <h1 class="title gradient-text">CODECHAIN ANALYZER</h1>
   <p class="subtitle">Analyze your code and secure it on the blockchain.</p>
-  <div class="input-area" id="codeInput" contenteditable="true" placeholder="Start typing your JavaScript code here..."></div>
-  <input type="text" id="walletInput" class="wallet-input" placeholder="Enter wallet address (e.g., 0x...)" required>
+  <div class="project-description">
+    <p>Enter your code below—our AI will analyze it for errors, suggest improvements, and give a health score!</p>
+    <p>Your review is then securely stored on the blockchain for transparency and trust.</p>
+    <p>Perfect for developers seeking secure, intelligent code insights.</p>
+  </div>
+  <div class="form-group">
+    <div class="field-label">Code</div>
+    <div class="input-area" id="codeInput" contenteditable="true"></div>
+  </div>
+  <div class="form-group">
+    <div class="field-label">Tech Language</div>
+    <div class="custom-select">
+      <select id="languageSelect"></select>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="field-label">Wallet Address</div>
+    <input type="text" id="walletInput" class="wallet-input" placeholder="Enter wallet address (e.g., 0x...)" required>
+  </div>
   <button id="analyzeButton" class="button">Analyze Code</button>
   <div id="loader" class="loader"></div>
   <div id="result" class="result"></div>
