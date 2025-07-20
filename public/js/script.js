@@ -4,6 +4,7 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
   const language = document.getElementById("languageSelect").value;
   const resultDiv = document.getElementById("result");
   const loader = document.getElementById("loader");
+  const loaderNote = document.getElementById("loader-note"); // Add this ID to your HTML
 
   if (!code || !walletAddress) {
     resultDiv.innerHTML = `<p class="error">Please enter code and wallet address.</p>`;
@@ -11,8 +12,11 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
     return;
   }
 
+  // Hide result and show loader with note
   resultDiv.classList.remove("show");
   loader.style.display = "block";
+  loaderNote.style.display = "block";
+  loaderNote.textContent = "Processing your request, this may take up to a minute - please wait patiently.";
 
   try {
     const languages = await fetchLanguages();
@@ -25,36 +29,56 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
     });
 
     const data = await response.json();
-    loader.style.display = "none";
+    loader.style.display = "none"; // Hide loader after response
+    loaderNote.style.display = "none"; // Hide note after response
 
     if (data.status === false) {
       resultDiv.innerHTML = `<p class="error">${data.message}</p>`;
     } else if (data.status && data.data) {
       const review = data.data.review;
       const transactionId = data.data.transactionId;
-      let issuesHtml = review.issues.length ? review.issues.map(issue => `<span class="badge ${issue.includes('error') ? 'critical' : 'warning'}">${issue}</span>`).join(' ') : "<span>No issues</span>";
-      let suggestionsHtml = review.suggestions.length ? review.suggestions.map(suggestion => `<span class="tooltip">${suggestion}<span class="tooltiptext">Click to copy</span></span>`).join(', ') : "<span>No suggestions</span>";
+      let issuesHtml = review.issues.length
+        ? review.issues
+            .map(
+              (issue) =>
+                `<span class="badge ${
+                  issue.includes("error") ? "critical" : "warning"
+                }">${issue}</span>`
+            )
+            .join(" ")
+        : "<span>No issues</span>";
+      let suggestionsHtml = review.suggestions.length
+        ? review.suggestions
+            .map((suggestion) => `<p class="suggestion-item">${suggestion}</p>`)
+            .join("")
+        : "<p>No suggestions</p>";
 
       resultDiv.innerHTML = `
-        <div class="result-block"><h4>Issues Detected</h4><p>${issuesHtml}</p></div>
-        <div class="result-block"><h4>Suggestions for Improvement</h4><p>${suggestionsHtml}</p></div>
-        <div class="result-block"><h4>Code Health Score</h4><div class="score-bar"><div class="score-bar-fill" style="width: ${review.score * 100}%"></div></div><p>Score: ${review.score.toFixed(2)} / 1.0 <span class="tooltip">Hover for details<span class="tooltiptext">Your code's health reflects syntax, style, and optimization.</span></span></p></div>
-        <div class="result-block"><h4>Transaction Details</h4><p>Transaction ID: <a href="https://sepolia.etherscan.io/tx/${transactionId}" target="_blank">${transactionId.slice(0, 10)}...</a></p><p>Message: ${data.message}</p></div>
+        <div class="result-block"><h4>Issues Detected</h4><div class="issues-container">${issuesHtml}</div></div>
+        <div class="result-block"><h4>Suggestions for Improvement</h4><div class="suggestions-container">${suggestionsHtml}</div></div>
+        <div class="result-block"><h4>Code Health Score</h4><div class="score-bar"><div class="score-bar-fill" style="width: ${
+          review.score * 100
+        }%"></div></div><p>Score: ${review.score.toFixed(2)} / 1.0</p></div>
+        <div class="result-block"><h4>Transaction Details</h4><p>Transaction ID: <span class="transaction-id" title="${transactionId}">${transactionId.slice(
+        0,
+        10
+      )}...</span></p></div>
       `;
-      resultDiv.querySelectorAll('.tooltip').forEach(tooltip => {
-        tooltip.addEventListener('click', () => {
+      resultDiv.querySelectorAll(".tooltip").forEach((tooltip) => {
+        tooltip.addEventListener("click", () => {
           navigator.clipboard.writeText(tooltip.textContent);
-          const tooltiptext = tooltip.querySelector('.tooltiptext');
+          const tooltiptext = tooltip.querySelector(".tooltiptext");
           tooltiptext.textContent = "Copied!";
-          setTimeout(() => tooltiptext.textContent = "Click to copy", 2000);
+          setTimeout(() => (tooltiptext.textContent = "Click to copy"), 2000);
         });
       });
     } else {
       resultDiv.innerHTML = `<p class="error">Unexpected response format</p>`;
     }
-    resultDiv.classList.add("show");
+    resultDiv.classList.add("show"); // Show result after processing
   } catch (error) {
-    loader.style.display = "none";
+    loader.style.display = "none"; // Hide loader on error
+    loaderNote.style.display = "none"; // Hide note on error
     resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
     resultDiv.classList.add("show");
   }
@@ -63,14 +87,22 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
 // Fetch dynamic languages from GitHub Linguist API (simulated for now)
 async function fetchLanguages() {
   try {
-    const response = await fetch('https://api.github.com/languages', {
-      headers: { 'Accept': 'application/vnd.github.v3+json' }
+    const response = await fetch("https://api.github.com/languages", {
+      headers: { Accept: "application/vnd.github.v3+json" },
     });
     const data = await response.json();
-    return Object.keys(data).map(lang => ({ value: lang.toLowerCase(), label: lang.charAt(0).toUpperCase() + lang.slice(1) }));
+    return Object.keys(data).map((lang) => ({
+      value: lang.toLowerCase(),
+      label: lang.charAt(0).toUpperCase() + lang.slice(1),
+    }));
   } catch (error) {
     console.error("Language fetch error:", error);
-    return ["javascript", "python", "java", "cpp", "ruby", "go"].map(lang => ({ value: lang, label: lang.charAt(0).toUpperCase() + lang.slice(1) }));
+    return ["javascript", "python", "java", "cpp", "ruby", "go"].map(
+      (lang) => ({
+        value: lang,
+        label: lang.charAt(0).toUpperCase() + lang.slice(1),
+      })
+    );
   }
 }
 
@@ -78,7 +110,11 @@ async function fetchLanguages() {
 async function populateLanguages() {
   const select = document.getElementById("languageSelect");
   const languages = await fetchLanguages();
-  select.innerHTML = '<option value="">Select Language</option>' + languages.map(lang => `<option value="${lang.value}">${lang.label}</option>`).join('');
+  select.innerHTML =
+    '<option value="">Select Language</option>' +
+    languages
+      .map((lang) => `<option value="${lang.value}">${lang.label}</option>`)
+      .join("");
 }
 
 populateLanguages();
@@ -86,8 +122,10 @@ populateLanguages();
 // Dark/Light Mode Switch
 const modeSwitch = document.getElementById("modeSwitch");
 modeSwitch.addEventListener("click", () => {
-  document.body.dataset.theme = document.body.dataset.theme === "light" ? "dark" : "light";
-  modeSwitch.textContent = document.body.dataset.theme === "light" ? "Dark Mode 🌙" : "Light Mode ☀️";
+  document.body.dataset.theme =
+    document.body.dataset.theme === "light" ? "dark" : "light";
+  modeSwitch.textContent =
+    document.body.dataset.theme === "light" ? "Dark Mode 🌙" : "Light Mode ☀️";
 });
 
 document.body.dataset.theme = "dark";

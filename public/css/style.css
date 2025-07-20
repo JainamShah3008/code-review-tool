@@ -191,63 +191,71 @@ body::before {
 .custom-select {
   position: relative;
   width: 100%;
+  margin-bottom: 25px;
 }
 
 .custom-select select {
-  padding: 12px;
-  border: 2px solid rgba(0, 255, 204, 0.3);
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), rgba(255, 0, 255, 0.1));
-  color: #00FFCC; /* Neon green for better visibility */
+  padding: 15px 20px;
+  border: 2px solid rgba(0, 255, 204, 0.5);
+  border-radius: 12px;
+  background: var(--input-bg);
+  color: var(--text-primary);
   font-size: 1.1em;
   width: 100%;
   appearance: none;
+  -webkit-appearance: none; /* For Safari */
+  -moz-appearance: none; /* For Firefox */
   cursor: pointer;
   transition: all 0.3s ease;
-  background-image: linear-gradient(45deg, transparent 50%, #00FFCC 50%), linear-gradient(135deg, #00FFCC 50%, transparent 50%);
-  background-position: calc(100% - 20px) center, calc(100% - 15px) center;
-  background-size: 10px 10px, 10px 10px;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%2300FFCC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
   background-repeat: no-repeat;
-  box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
-  text-shadow: 0 0 5px rgba(255, 0, 255, 0.3);
+  background-position: calc(100% - 15px) center;
+  text-indent: 0.01px; /* Prevent text jump */
+  text-overflow: ""; /* Prevent ellipsis */
 }
 
 .custom-select select:focus {
-  background: linear-gradient(135deg, rgba(0, 255, 204, 0.2), rgba(255, 0, 255, 0.2));
-  box-shadow: 0 0 20px rgba(0, 255, 204, 0.7);
+  border-color: #00ffcc;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
   outline: none;
 }
 
 .custom-select select:hover {
   transform: scale(1.02);
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
 }
 
-/* Style the dropdown options */
+/* Force styles on options (limited control) */
 .custom-select option {
-  background: var(--bg-secondary); /* Match theme background */
-  color: #00FFCC; /* Neon green text */
-  padding: 12px; /* Increased padding for better spacing */
-  font-size: 1em;
-  transition: all 0.3s ease;
-  border-bottom: 1px solid rgba(0, 255, 204, 0.1); /* Subtle separator */
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  padding: 15px 20px !important;
+  font-size: 1em !important;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.1) !important;
+  transition: all 0.2s ease !important;
 }
 
 .custom-select option:hover {
-  background: rgba(0, 255, 204, 0.2); /* Gradient-like hover effect */
-  color: #FF00FF; /* Purple highlight */
-  transform: scale(1.05); /* Slight zoom on hover */
+  background: rgba(0, 255, 204, 0.1) !important;
+  color: #ff00ff !important;
+  transform: scale(1.02) !important;
 }
 
 .custom-select option:first-child {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
 }
 
 .custom-select option:last-child {
-  border-bottom: none;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-bottom: none !important;
+  border-bottom-left-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
+/* Fallback for browsers that ignore option styles */
+.custom-select select::-ms-expand {
+  display: none; /* Hide default arrow in IE */
 }
 
 .wallet-input {
@@ -367,8 +375,11 @@ body::before {
   text-align: left;
   position: relative;
   overflow: hidden;
-  width: 100%;
-  max-width: 600px;
+  display: none; /* Hide by default */
+}
+
+.result.show {
+  display: block; /* Show only when class 'show' is added */
 }
 
 .result::before {
@@ -384,6 +395,8 @@ body::before {
     transparent 70%
   );
   animation: glow 10s infinite;
+  width: 100%;
+  max-width: 600px;
 }
 
 .result-block {
@@ -393,6 +406,147 @@ body::before {
   border-radius: 10px;
   border-left: 4px solid #00ffcc;
   animation: slideIn 0.5s ease-out;
+}
+
+.issues-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+.badge.critical {
+  background: #ff4040;
+  color: #fff;
+}
+
+.badge.warning {
+  background: #ffa500;
+  color: #fff;
+}
+
+.suggestions-container {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(0, 255, 204, 0.1);
+  border-radius: 8px;
+  color: #ff00ff;
+}
+
+.suggestion-item {
+  margin: 5px 0;
+  line-height: 1.5;
+}
+
+.transaction-id {
+  color: #00ffcc;
+  cursor: pointer;
+}
+
+.transaction-id:hover {
+  text-decoration: underline;
+}
+
+.score-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.loader {
+  display: none;
+  width: 80px;
+  height: 80px;
+  position: relative;
+  margin: 20px auto;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.loader::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #00ffcc, #ff00ff);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 15px #00ffcc;
+}
+
+.loader::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: #ff00ff;
+  border-radius: 50%;
+  animation: orbit 2s infinite linear;
+}
+
+.loader-note {
+  display: none;
+  text-align: center;
+  color: #00ffcc;
+  font-size: 1.1em;
+  margin-top: 10px;
+  animation: fade 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes orbit {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) translateX(35px);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) translateX(35px);
+  }
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ffcc, #ff00ff);
+  transition: width 0.5s ease;
 }
 
 .result-block h4 {
