@@ -1,13 +1,13 @@
 document.getElementById("analyzeButton").addEventListener("click", async () => {
   const code = document.getElementById("codeInput").innerText.trim();
   const walletAddress = document.getElementById("walletInput").value;
-  const language = document.getElementById("languageSelect").value;
+  const language = document.querySelector("#newLanguageSelect .select-trigger").dataset.value || "";
   const resultDiv = document.getElementById("result");
   const loader = document.getElementById("loader");
   const loaderNote = document.getElementById("loader-note");
 
-  if (!code || !walletAddress) {
-    resultDiv.innerHTML = `<p class="error">Please enter code and wallet address.</p>`;
+  if (!code || !walletAddress || !language) {
+    resultDiv.innerHTML = `<p class="error">Please enter code, wallet address, and select a language.</p>`;
     resultDiv.classList.add("show");
     return;
   }
@@ -19,7 +19,6 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
 
   try {
     const languages = await fetchLanguages();
-    console.log("Fetched languages:", languages);
 
     const response = await fetch("/v1/code-review-tool/review-suggestion-code", {
       method: "POST",
@@ -40,9 +39,7 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
         ? review.issues
             .map(
               (issue, index) =>
-                `<div class="issues-item" style="animation-delay: ${
-                  index * 0.2
-                }s"><span class="badge ${
+                `<div class="issues-item" style="animation-delay: ${index * 0.2}s"><span class="badge ${
                   issue.includes("error") ? "critical" : "warning"
                 }">${issue}</span></div>`
             )
@@ -50,12 +47,7 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
         : "<div class='issues-item'><span>No issues</span></div>";
       let suggestionsHtml = review.suggestions.length
         ? review.suggestions
-            .map(
-              (suggestion, index) =>
-                `<div class="suggestion-part" style="animation-delay: ${
-                  index * 0.2
-                }s"><p>${suggestion}</p></div>`
-            )
+            .map((suggestion, index) => `<div class="suggestion-part" style="animation-delay: ${index * 0.2}s"><p>${suggestion}</p></div>`)
             .join("")
         : "<div class='suggestion-part'><p>No suggestions</p></div>";
 
@@ -90,37 +82,78 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
   }
 });
 
-// Fetch dynamic languages from GitHub Linguist API (simulated for now)
+// Fetch dynamic languages from GitHub Linguist API (replaced with static list)
 async function fetchLanguages() {
-  try {
-    const response = await fetch("https://api.github.com/languages", {
-      headers: { Accept: "application/vnd.github.v3+json" },
-    });
-    const data = await response.json();
-    return Object.keys(data).map((lang) => ({
-      value: lang.toLowerCase(),
-      label: lang.charAt(0).toUpperCase() + lang.slice(1),
-    }));
-  } catch (error) {
-    console.error("Language fetch error:", error);
-    return ["javascript", "python", "java", "cpp", "ruby", "go"].map(
-      (lang) => ({
-        value: lang,
-        label: lang.charAt(0).toUpperCase() + lang.slice(1),
-      })
-    );
-  }
+  // Static list of most useful languages worldwide
+  const staticLanguages = ["javascript", "python", "java", "cpp", "csharp", "php", "typescript", "swift", "kotlin", "rust"].map((lang) => ({
+    value: lang,
+    label: lang.charAt(0).toUpperCase() + lang.slice(1),
+  }));
+  return staticLanguages;
 }
 
 // Populate dynamic language dropdown
 async function populateLanguages() {
-  const select = document.getElementById("languageSelect");
+  const selectContainer = document.getElementById("newLanguageSelect");
+  const selectOptions = selectContainer.querySelector(".select-options");
+  const selectTrigger = selectContainer.querySelector(".select-trigger");
+  const searchInput = selectContainer.querySelector(".select-search");
+  const optionsList = selectContainer.querySelector(".options-list");
   const languages = await fetchLanguages();
-  select.innerHTML =
-    '<option value="">Select Language</option>' +
-    languages
-      .map((lang) => `<option value="${lang.value}">${lang.label}</option>`)
-      .join("");
+
+  // Ensure dropdown is closed by default
+  selectOptions.style.display = "none";
+  selectContainer.classList.remove("open");
+
+  // Store original languages for filtering
+  let allLanguages = languages;
+
+  // Function to render options
+  function renderOptions(options) {
+    optionsList.innerHTML = options.map((lang) => `<div class="select-option" data-value="${lang.value}">${lang.label}</div>`).join("");
+
+    // Add event listeners to options
+    optionsList.querySelectorAll(".select-option").forEach((option) => {
+      option.addEventListener("click", () => {
+        selectTrigger.textContent = option.textContent;
+        selectTrigger.dataset.value = option.dataset.value;
+        selectOptions.style.display = "none"; // Explicitly hide options
+        selectContainer.classList.remove("open");
+        searchInput.value = ""; // Clear search input
+        renderOptions(allLanguages); // Reset to full list
+      });
+    });
+  }
+
+  // Initial render
+  renderOptions(allLanguages);
+
+  // Search functionality
+  searchInput.addEventListener("input", () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filteredLanguages = allLanguages.filter((lang) => lang.label.toLowerCase().includes(searchTerm));
+    renderOptions(filteredLanguages);
+  });
+
+  // Toggle dropdown
+  selectTrigger.addEventListener("click", () => {
+    const isOpen = selectContainer.classList.contains("open");
+    selectOptions.style.display = isOpen ? "none" : "block";
+    selectContainer.classList.toggle("open");
+    if (!isOpen) {
+      searchInput.focus(); // Focus search input when dropdown opens
+    }
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!selectContainer.contains(e.target)) {
+      selectOptions.style.display = "none";
+      selectContainer.classList.remove("open");
+      searchInput.value = ""; // Clear search input
+      renderOptions(allLanguages); // Reset to full list
+    }
+  });
 }
 
 populateLanguages();
@@ -128,10 +161,8 @@ populateLanguages();
 // Dark/Light Mode Switch
 const modeSwitch = document.getElementById("modeSwitch");
 modeSwitch.addEventListener("click", () => {
-  document.body.dataset.theme =
-    document.body.dataset.theme === "light" ? "dark" : "light";
-  modeSwitch.textContent =
-    document.body.dataset.theme === "light" ? "Dark Mode 🌙" : "Light Mode ☀️";
+  document.body.dataset.theme = document.body.dataset.theme === "light" ? "dark" : "light";
+  modeSwitch.textContent = document.body.dataset.theme === "light" ? "Dark Mode 🌙" : "Light Mode ☀️";
 });
 
 document.body.dataset.theme = "dark";

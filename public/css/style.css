@@ -130,7 +130,7 @@ body::before {
 
 .form-group {
   margin-bottom: 25px;
-  width: 100%; /* Removed max-width: 600px as requested */
+  width: 100%;
 }
 
 .field-label {
@@ -147,15 +147,15 @@ body::before {
 }
 
 .input-area {
-  padding: 25px !important; /* Outer padding for the div */
+  padding: 25px !important;
   border: 2px solid rgba(0, 255, 204, 0.3);
   border-radius: 10px;
-  background: var(--input-bg) !important; /* Override black background */
-  color: var(--text-primary) !important; /* Override gray color */
-  font-family: "Consolas", "Courier New", monospace !important; /* Match inspected font */
-  font-size: 14px !important; /* Match inspected size */
-  line-height: 19px !important; /* Match inspected line height */
-  white-space: pre !important; /* Match inspected white-space */
+  background: var(--input-bg) !important;
+  color: var(--text-primary) !important;
+  font-family: "Consolas", "Courier New", monospace !important;
+  font-size: 14px !important;
+  line-height: 19px !important;
+  white-space: pre !important;
   min-height: 150px;
   max-height: 300px;
   overflow-y: auto;
@@ -163,17 +163,15 @@ body::before {
   transition: all 0.3s ease;
   outline: none;
   contenteditable: true;
-  position: relative; /* For pseudo-element positioning */
+  position: relative;
 }
 
-/* Style the content inside the contenteditable div */
 .input-area * {
-  padding: 3px !important; /* Internal padding for the content */
-  margin: 0 !important; /* Reset any unwanted margins */
+  padding: 3px !important;
+  margin: 0 !important;
   overflow: hidden !important;
 }
 
-/* Ensure the placeholder text has proper spacing */
 .input-area:empty:before {
   content: "Paste your code here (e.g., functions, loops, or classes)...";
   color: rgba(255, 255, 255, 0.5);
@@ -184,78 +182,142 @@ body::before {
   box-shadow: 0 0 20px rgba(0, 255, 204, 0.7);
 }
 
-.input-area-padding {
-  padding: 25px;
-}
-
-.custom-select {
+.new-custom-select {
   position: relative;
   width: 100%;
-  margin-bottom: 25px;
 }
 
-.custom-select select {
+.select-trigger {
   padding: 15px 20px;
   border: 2px solid rgba(0, 255, 204, 0.5);
   border-radius: 12px;
   background: var(--input-bg);
   color: var(--text-primary);
   font-size: 1.1em;
-  width: 100%;
-  appearance: none;
-  -webkit-appearance: none; /* For Safari */
-  -moz-appearance: none; /* For Firefox */
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%2300FFCC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
-  background-repeat: no-repeat;
-  background-position: calc(100% - 15px) center;
-  text-indent: 0.01px; /* Prevent text jump */
-  text-overflow: ""; /* Prevent ellipsis */
+  position: relative;
+  text-align: left;
+  font-family: "Arial", sans-serif;
 }
 
-.custom-select select:focus {
-  border-color: #00ffcc;
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+.select-trigger::after {
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%2300FFCC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.new-custom-select.open .select-trigger::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.select-options {
+  background: var(--bg-secondary);
+  border: 2px solid rgba(0, 255, 204, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+  z-index: 10;
+  max-height: 250px;
+  margin-top: 5px;
+  animation: slideDown 0.3s ease-out;
+  position: relative;
+  padding: 5px 4px 20px;
+}
+
+.options-list {
+  max-height: 200px;
+  overflow-x: hidden;
+  overflow-y: auto; /* Ensure scrolling is enabled */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #00ffcc rgba(0, 255, 204, 0.2); /* Thumb and track colors */
+}
+
+/* Custom scrollbar styles */
+.options-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.options-list::-webkit-scrollbar-track {
+  background: rgba(0, 255, 204, 0.1);
+  border-radius: 5px;
+}
+
+.options-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #00ffcc, #ff00ff);
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+.options-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #00cccc, #ff00cc);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
+}
+
+.new-custom-select.open .select-options {
+  display: block;
+}
+
+.select-search-container {
+  padding: 10px 15px;
+  /* width: 100%; */
+}
+
+.select-search {
+  width: 50%;
+  padding: 10px 15px;
+  border: none;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 1em;
   outline: none;
+  transition: all 0.3s ease;
+  border-radius: 10px;
 }
 
-.custom-select select:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+.options-list {
+  max-height: 200px;
+  overflow-x: hidden;
+  overflow-y: auto; /* Ensure scrolling is enabled */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #00ffcc rgba(0, 255, 204, 0.2); /* Thumb and track colors */
 }
 
-/* Force styles on options (limited control) */
-.custom-select option {
-  background: var(--bg-secondary) !important;
-  color: var(--text-primary) !important;
-  padding: 15px 20px !important;
-  font-size: 1em !important;
-  border-bottom: 1px solid rgba(0, 255, 204, 0.1) !important;
-  transition: all 0.2s ease !important;
+/* Custom scrollbar styles */
+.options-list::-webkit-scrollbar {
+  width: 10px;
 }
 
-.custom-select option:hover {
-  background: rgba(0, 255, 204, 0.1) !important;
-  color: #ff00ff !important;
-  transform: scale(1.02) !important;
+.select-option {
+  padding: 12px 20px;
+  color: var(--text-primary);
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.1);
 }
 
-.custom-select option:first-child {
-  border-top-left-radius: 12px !important;
-  border-top-right-radius: 12px !important;
+.select-option:hover {
+  background: rgba(0, 255, 204, 0.2);
+  color: #ff00ff;
+  transform: translateX(5px);
 }
 
-.custom-select option:last-child {
-  border-bottom: none !important;
-  border-bottom-left-radius: 12px !important;
-  border-bottom-right-radius: 12px !important;
+.select-option:last-child {
+  border-bottom: none;
 }
 
-/* Fallback for browsers that ignore option styles */
-.custom-select select::-ms-expand {
-  display: none; /* Hide default arrow in IE */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .wallet-input {
@@ -265,7 +327,7 @@ body::before {
   background: var(--input-bg);
   color: var(--text-primary);
   font-size: 1.1em;
-  width: 100%;
+  width: -webkit-fill-available;
   transition: all 0.3s ease;
 }
 
@@ -363,11 +425,7 @@ body::before {
 .result {
   margin-top: 20px;
   padding: 20px;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 255, 204, 0.1),
-    rgba(255, 0, 255, 0.1)
-  );
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), rgba(255, 0, 255, 0.1));
   border-radius: 15px;
   border: 2px solid #00ffcc;
   box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
@@ -375,11 +433,11 @@ body::before {
   text-align: left;
   position: relative;
   overflow: hidden;
-  display: none; /* Hide by default */
+  display: none;
 }
 
 .result.show {
-  display: block; /* Show only when class 'show' is added */
+  display: block;
 }
 
 .result::before {
@@ -389,11 +447,7 @@ body::before {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(0, 255, 204, 0.2) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(0, 255, 204, 0.2) 0%, transparent 70%);
   animation: glow 10s infinite;
   width: 100%;
   max-width: 600px;
@@ -485,14 +539,10 @@ body::before {
 .suggestions-container {
   margin-top: 10px;
   padding: 15px;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 128, 128, 0.1),
-    rgba(255, 0, 153, 0.1)
-  );
+  background: linear-gradient(135deg, rgba(0, 128, 128, 0.1), rgba(255, 0, 153, 0.1));
   border-radius: 10px;
   border: 1px dashed rgba(0, 255, 204, 0.3);
-  color: #ffff00; /* Neon yellow for text */
+  color: #ffff00;
   position: relative;
   overflow: hidden;
 }
@@ -512,7 +562,7 @@ body::before {
   margin: 15px 0;
   padding: 10px;
   background: rgba(0, 128, 128, 0.2);
-  border-left: 4px solid #ff00ff; /* Magenta accent */
+  border-left: 4px solid #ff00ff;
   border-radius: 5px;
   position: relative;
   animation: slideUp 0.5s ease-out forwards;
@@ -567,14 +617,6 @@ body::before {
   }
 }
 
-@keyframes bgShift {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-20px);
-  }
-}
 .suggestion-item {
   margin: 5px 0;
   padding: 8px;
@@ -646,11 +688,7 @@ body::before {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(0, 255, 204, 0.1) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%);
   animation: rotateGlow 10s infinite linear;
 }
 

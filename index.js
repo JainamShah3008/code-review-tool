@@ -9,14 +9,24 @@ const app = express();
 const port = process.env.PORT || 3006;
 const HOST_URL = process.env.HOST_URL || "http://localhost:3006";
 
-// disable `X-Powered-By` header that reveals information about the server
+// Disable `X-Powered-By` header
 app.disable("x-powered-by");
 
-// set security HTTP headers
-app.use(helmet());
+// Set security HTTP headers with custom CSP
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", "https://api.github.com"], // Allow GitHub API
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles (if needed for your app)
+        scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts (if needed)
+      },
+    },
+  })
+);
 
-
-// enable cors
+// Enable CORS
 app.use(cors());
 app.options("*", cors());
 
@@ -43,5 +53,5 @@ app.get("/", (req, res) => {
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
-  console.log(`Project Running On :  ${HOST_URL}`)
+  console.log(`Project Running On :  ${HOST_URL}`);
 });
