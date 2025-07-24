@@ -867,12 +867,12 @@ body::before {
 }
 
 .result-block .badge.critical {
-  background: #ff4040;
+  background: #9d3838;
   color: #fff;
 }
 
 .result-block .badge.warning {
-  background: #ffa500;
+  background: rgba(255, 255, 255, 0.05);
   color: #fff;
 }
 
