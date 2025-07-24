@@ -635,6 +635,10 @@ body::before {
   font-size: 1.2em;
 }
 
+[data-theme="light"] .issues-item::before {
+  color: #4a90e2;
+}
+
 @keyframes fadeInItem {
   from {
     opacity: 0;
@@ -715,6 +719,10 @@ body::before {
   color: #00ffcc;
   font-size: 1.5em;
   margin-right: 10px;
+}
+
+[data-theme="light"] .suggestion-part::before {
+  color: #4a90e2;
 }
 
 .suggestion-part::after {

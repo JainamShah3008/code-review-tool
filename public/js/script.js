@@ -5,6 +5,7 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
   const resultDiv = document.getElementById("result");
   const loader = document.getElementById("loader");
   const loaderNote = document.getElementById("loader-note");
+  const analyzeButton = document.getElementById("analyzeButton");
 
   if (!code || !walletAddress || !language) {
     resultDiv.innerHTML = `<p class="error">Please enter code, wallet address, and select a language.</p>`;
@@ -12,6 +13,9 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
     return;
   }
 
+  // Show loading state on button instead of disabling
+  const originalButtonText = analyzeButton.textContent;
+  analyzeButton.textContent = "Analyzing...";
   resultDiv.classList.remove("show");
   loader.style.display = "block";
   loaderNote.style.display = "block";
@@ -57,11 +61,44 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
         <div class="result-block"><h4>Code Health Score</h4><div class="score-bar"><div class="score-bar-fill" style="width: ${
           review.score * 100
         }%"></div></div><p>Score: ${review.score.toFixed(2)} / 1.0</p></div>
-        <div class="result-block transaction-block"><h4>Transaction Details</h4><p>Transaction ID: <span class="transaction-id" title="${transactionId}">${transactionId.slice(
+        <div class="result-block transaction-block"><h4>Transaction Details</h4><p>Transaction ID: <a href="https://sepolia.etherscan.io/tx/${transactionId}" target="_blank"><span class="transaction-id" title="${transactionId}">${transactionId.slice(
         0,
         10
-      )}...</span></p></div>
+      )}...</span></a></p></div>
+        <div class="result-block" style="text-align: center;">
+          <button class="button" id="resetButton">Reset</button>
+          <button class="button" id="downloadButton">Download Result</button>
+        </div>
       `;
+      resultDiv.classList.add("show");
+
+      // Add reset functionality
+      document.getElementById("resetButton").addEventListener("click", () => {
+        document.getElementById("codeInput").innerText = "";
+        document.getElementById("walletInput").value = "";
+        document.querySelector("#newLanguageSelect .select-trigger").textContent = "Select Language";
+        document.querySelector("#newLanguageSelect .select-trigger").dataset.value = "";
+        resultDiv.classList.remove("show");
+        analyzeButton.textContent = originalButtonText;
+      });
+
+      // Add download functionality as PDF with design
+      document.getElementById("downloadButton").addEventListener("click", () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Code Health Analysis", 10, 10);
+        doc.setLineWidth(0.5);
+        doc.line(10, 15, 200, 15);
+        doc.setFontSize(12);
+        doc.text(`Issues Detected: ${review.issues.length ? review.issues.join("\n") : "No issues"}`, 10, 25);
+        doc.text(`Suggestions: ${review.suggestions.length ? review.suggestions.join("\n") : "No suggestions"}`, 10, 40);
+        doc.text(`Score: ${review.score.toFixed(2)} / 1.0`, 10, 55);
+        doc.text(`Transaction ID: ${transactionId}`, 10, 70);
+        doc.save("code_analysis_result.pdf");
+      });
+
+      // Add tooltip event listeners
       resultDiv.querySelectorAll(".tooltip").forEach((tooltip) => {
         tooltip.addEventListener("click", () => {
           navigator.clipboard.writeText(tooltip.textContent);
@@ -74,11 +111,13 @@ document.getElementById("analyzeButton").addEventListener("click", async () => {
       resultDiv.innerHTML = `<p class="error">Unexpected response format</p>`;
     }
     resultDiv.classList.add("show");
+    analyzeButton.textContent = originalButtonText; // Restore button text on completion
   } catch (error) {
     loader.style.display = "none";
     loaderNote.style.display = "none";
     resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
     resultDiv.classList.add("show");
+    analyzeButton.textContent = originalButtonText; // Restore button text on error
   }
 });
 
