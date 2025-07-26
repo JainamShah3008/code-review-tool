@@ -12,16 +12,17 @@ const HOST_URL = process.env.HOST_URL || "http://localhost:3006";
 // Disable `X-Powered-By` header
 app.disable("x-powered-by");
 
+// Serve static files
+app.use(express.static('public'));
+
 // Set security HTTP headers with custom CSP
 app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        connectSrc: ["'self'", "https://api.github.com"], // Allow GitHub API
-        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles (if needed for your app)
-        scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts (if needed)
-      },
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
     },
   })
 );
@@ -32,6 +33,7 @@ app.options("*", cors());
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));

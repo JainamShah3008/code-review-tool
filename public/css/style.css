@@ -15,7 +15,11 @@
   --text-secondary: #4a4a4a;
   --input-bg: rgba(0, 0, 0, 0.05);
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  --accent: linear-gradient(45deg, #4a90e2, #50e3c2); /* Softer gradient for light mode */
+  --accent: linear-gradient(
+    45deg,
+    #4a90e2,
+    #50e3c2
+  ); /* Softer gradient for light mode */
 }
 
 /* Adjust specific elements for light mode */
@@ -73,7 +77,11 @@
 
 [data-theme="light"] .result {
   border-color: #4a90e2;
-  background: linear-gradient(135deg, rgba(74, 144, 226, 0.05), rgba(80, 227, 194, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(74, 144, 226, 0.05),
+    rgba(80, 227, 194, 0.05)
+  );
   box-shadow: 0 0 10px rgba(74, 144, 226, 0.1);
 }
 
@@ -94,7 +102,11 @@
 
 [data-theme="light"] .suggestions-container {
   border-color: rgba(74, 144, 226, 0.2);
-  background: linear-gradient(135deg, rgba(74, 144, 226, 0.05), rgba(80, 227, 194, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(74, 144, 226, 0.05),
+    rgba(80, 227, 194, 0.05)
+  );
 }
 
 [data-theme="light"] .score-bar {
@@ -442,8 +454,12 @@ body::before {
 
 .select-option:hover {
   background: rgba(0, 255, 204, 0.2);
-  color: #ff00ff;
+  color: #eee5ee;
   transform: translateX(5px);
+}
+
+[data-theme="light"] .select-option:hover {
+  color: #650d65;
 }
 
 .select-option:last-child {
@@ -566,7 +582,11 @@ body::before {
 .result {
   margin-top: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), rgba(255, 0, 255, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 255, 204, 0.1),
+    rgba(255, 0, 255, 0.1)
+  );
   border-radius: 15px;
   border: 2px solid #00ffcc;
   box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
@@ -575,6 +595,7 @@ body::before {
   position: relative;
   overflow: hidden;
   display: none;
+  width: -webkit-fill-available;
 }
 
 .result.show {
@@ -588,7 +609,11 @@ body::before {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(0, 255, 204, 0.2) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 204, 0.2) 0%,
+    transparent 70%
+  );
   animation: glow 10s infinite;
   width: 100%;
   max-width: 600px;
@@ -684,7 +709,11 @@ body::before {
 .suggestions-container {
   margin-top: 10px;
   padding: 15px;
-  background: linear-gradient(135deg, rgba(0, 128, 128, 0.1), rgba(255, 0, 153, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 128, 128, 0.1),
+    rgba(255, 0, 153, 0.1)
+  );
   border-radius: 10px;
   border: 1px dashed rgba(0, 255, 204, 0.3);
   color: #ffff00;
@@ -837,7 +866,11 @@ body::before {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 204, 0.1) 0%,
+    transparent 70%
+  );
   animation: rotateGlow 10s infinite linear;
 }
 
