@@ -7,11 +7,18 @@ const web3 = new Web3(
   process.env.WEB3_PROVIDER_URL ||
     "https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID"
 );
-const contractAddress = require("../contract-address.json").contractAddress;
-const contractABI = require("../contract-abi.json");
+
+let contractAddress, contractABI;
+try {
+  contractAddress = require("../contract-address.json").contractAddress;
+  contractABI = require("../contract-abi.json");
+} catch (error) {
+  console.error("Error loading contract files:", error.message);
+  throw new Error("Failed to load contract address or ABI");
+}
+
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 const privateKey = process.env.ETHEREUM_PRIVATE_KEY;
-
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const cache = new Map();
 
@@ -23,7 +30,32 @@ module.exports.analyzeCode = async (code, language) => {
   }
 
   try {
-    const prompt = `Analyze the following ${language} code for syntax errors, style issues, and optimization suggestions. Return only a JSON object with fields: issues (array), suggestions (array), score (number between 0 and 1). Example: {"issues": ["Syntax error: extra brace"], "suggestions": ["Remove extra braces"], "score": 0.6}. Code:\n${code}\n`;
+    const prompt = `
+Analyze the following ${language} code for syntax errors, style issues, and optimization opportunities. Return a JSON object with:
+1. **score**: A number (0-1) assessing code quality based on readability, efficiency, maintainability, and best practices.
+2. **issues**: An array of objects, each with:
+   - **line_number**: Line where the issue appears (if applicable, else -1).
+   - **description**: Clear explanation of the issue.
+   - **severity**: "low", "medium", or "high".
+3. **suggestions**: An array of objects, each with:
+   - **description**: Detailed suggestion for improving the code.
+   - **example**: A specific code snippet showing the improvement applied to the provided code.
+   - **benefit**: Why this improvement is valuable.
+
+Ensure suggestions and examples directly reference and modify the provided code. Examples must be syntactically correct and concise. Return only the JSON object, enclosed in triple backticks (\`\`\`json\n...\n\`\`\`).
+
+Code:
+${code}
+
+Example response:
+\`\`\`json
+{
+  "score": 0.6,
+  "issues": [{"line_number": 5, "description": "Syntax error: extra brace", "severity": "high"}],
+  "suggestions": [{"description": "Remove extra braces", "example": "<modified code>", "benefit": "Improves readability"}]
+}
+\`\`\`
+    `;
     const response = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "llama-3.3-70b-versatile",
@@ -32,14 +64,36 @@ module.exports.analyzeCode = async (code, language) => {
     });
 
     const output = response.choices[0].message.content.trim();
-    const jsonMatch = output.match(/\{(?:[^{}]|(?:\{[^{}]*\}))*\}/);
-    if (jsonMatch) {
-      const review = JSON.parse(jsonMatch[0]);
-      cache.set(cacheKey, review);
-      return review;
-    } else {
+    const jsonMatch = output.match(/```json\n([\s\S]*?)\n```/);
+    if (!jsonMatch || !jsonMatch[1]) {
       throw new Error("Model returned invalid JSON format");
     }
+
+    const review = JSON.parse(jsonMatch[1]);
+    if (
+      typeof review.score !== "number" ||
+      !Array.isArray(review.issues) ||
+      !Array.isArray(review.suggestions) ||
+      review.issues.some(
+        (issue) =>
+          typeof issue.line_number !== "number" ||
+          typeof issue.description !== "string" ||
+          !["low", "medium", "high"].includes(issue.severity)
+      ) ||
+      review.suggestions.some(
+        (sug) =>
+          typeof sug.description !== "string" ||
+          typeof sug.example !== "string" ||
+          typeof sug.benefit !== "string"
+      )
+    ) {
+      throw new Error(
+        "Invalid review structure: missing or malformed score, issues, or suggestions"
+      );
+    }
+
+    cache.set(cacheKey, review);
+    return review;
   } catch (error) {
     console.error("API Error:", error.message);
     throw error;
@@ -69,17 +123,6 @@ module.exports.reviewCode = async (req, res) => {
 
   try {
     const review = await this.analyzeCode(code, language);
-
-    if (
-      !review.issues ||
-      !review.suggestions ||
-      typeof review.score !== "number"
-    ) {
-      console.error("Invalid review format:", review);
-      return res
-        .status(500)
-        .json({ status: false, message: "Invalid review format" });
-    }
 
     const reviewHash = web3.utils.sha3(JSON.stringify(review));
     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
@@ -242,7 +285,11 @@ module.exports.downloadPdf = async (req, res) => {
         doc
           .fontSize(11)
           .fillColor("black")
-          .text(`${idx + 1}. ${issue}`);
+          .text(
+            `${idx + 1}. Line ${issue.line_number}: ${issue.description} (${
+              issue.severity
+            })`
+          );
       });
     } else {
       doc.fontSize(11).fillColor("gray").text("No issues detected.");
@@ -266,7 +313,22 @@ module.exports.downloadPdf = async (req, res) => {
         doc
           .fontSize(11)
           .fillColor("black")
-          .text(`${idx + 1}. ${sug}`);
+          .text(`${idx + 1}. ${sug.description}`);
+        doc
+          .moveDown(0.3)
+          .fontSize(10)
+          .fillColor("black")
+          .text("Example:", { underline: true });
+        doc
+          .font("Courier")
+          .fontSize(9)
+          .fillColor("black")
+          .text(sug.example, { lineGap: 1 });
+        doc
+          .moveDown(0.3)
+          .fontSize(10)
+          .fillColor("black")
+          .text(`Benefit: ${sug.benefit}`);
       });
     } else {
       doc.fontSize(11).fillColor("gray").text("No suggestions.");
@@ -296,9 +358,7 @@ module.exports.downloadPdf = async (req, res) => {
       .text(`Transaction ID: ${transactionId.slice(0, 10)}...`);
     doc.fontSize(10).fillColor("gray").text(`Language: ${language}`);
 
-    // ✅ FINAL FOOTER (no doc.addPage() after)
     drawFooter();
-
     doc.end();
   } catch (err) {
     console.error("PDF Generation Error:", err);

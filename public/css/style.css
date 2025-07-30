@@ -1167,3 +1167,95 @@ body::before {
     padding: 10px;
   }
 }
+
+/* Collapsible Suggestion Section */
+/* Existing styles remain unchanged unless specified */
+
+/* Collapsible Suggestion Section */
+.suggestion-container {
+  margin: 15px 0;
+  position: relative;
+  animation: slideUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.suggestion-part {
+  padding: 10px;
+  background: rgba(0, 128, 128, 0.2);
+  border-left: 4px solid #ff00ff;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+}
+
+.suggestion-part .suggestion-header {
+  display: flex;
+  align-items: center;
+  font-size: 1.1em;
+  color: var(--text-primary);
+}
+
+.suggestion-part .suggestion-header::before {
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2300FFCC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  margin-right: 10px;
+  transition: transform 0.3s ease;
+}
+
+[data-theme="light"] .suggestion-part .suggestion-header::before {
+  content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%234A90E2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+}
+
+.suggestion-container.expanded .suggestion-part .suggestion-header::before {
+  transform: rotate(180deg);
+}
+
+.suggestion-content {
+  display: none;
+  margin-top: 0;
+  padding: 10px;
+  background: rgba(0, 255, 204, 0.1);
+  border-radius: 0 0 5px 5px;
+  border-left: 4px solid #ff00ff;
+  border-top: none;
+  color: var(--text-secondary);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+
+.suggestion-container.expanded .suggestion-content {
+  display: block;
+  max-height: 500px; /* Adjust based on content height */
+  padding: 10px;
+}
+
+.suggestion-content pre {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 5px;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+[data-theme="light"] .suggestion-content pre {
+  background: rgba(0, 0, 0, 0.05);
+  color: #2a004f;
+}
+
+.suggestion-content p {
+  margin: 5px 0;
+}
+
+/* Ensure existing styles remain compatible */
+.suggestions-container {
+  margin-top: 10px;
+  padding: 15px;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 128, 128, 0.1),
+    rgba(255, 0, 153, 0.1)
+  );
+  border-radius: 10px;
+  border: 1px dashed rgba(0, 255, 204, 0.3);
+}
